@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -19,7 +20,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
+        TriMetResponse.Listener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -109,10 +111,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void getDeviceLocation() {
-    /*
-     * Get the best and most recent location of the device, which may be null in rare
-     * cases when a location is not available.
-     */
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
         try {
             if (locationPermissionGranted) {
                 Task locationResult = fusedLocationProviderClient.getLastLocation();
@@ -131,11 +133,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
                             map.getUiSettings().setMyLocationButtonEnabled(false);
                         }
+                        sendRequest();
                     }
                 });
             }
         } catch(SecurityException e)  {
             Log.e("Exception: %s", e.getMessage());
         }
+    }
+
+    private void sendRequest() {
+        TriMetRequest request = new TriMetRequest(new TriMetRequest.Bbox(
+                map.getProjection().getVisibleRegion().latLngBounds));
+        request.send(this, this);
+    }
+
+    @Override
+    public void onResponse(TriMetResponse response) {
+        Toast.makeText(this, response.response.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onError(String error) {
+        Toast.makeText(this, error, Toast.LENGTH_LONG).show();
     }
 }
