@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Hey, that\'s my stop!</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="missing_permissions">Location permissions required!</string>
+</resources>
