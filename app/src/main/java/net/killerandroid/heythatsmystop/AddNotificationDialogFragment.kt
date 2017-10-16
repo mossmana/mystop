@@ -42,7 +42,7 @@ class AddNotificationDialogFragment : DialogFragment() {
     override fun onDismiss(dialog: DialogInterface?) {
         super.onDismiss(dialog)
         val listener = activity as? DialogInterface.OnDismissListener
-        listener!!.onDismiss(dialog)
+        listener?.onDismiss(dialog)
     }
 
     private fun toggleNotification() {

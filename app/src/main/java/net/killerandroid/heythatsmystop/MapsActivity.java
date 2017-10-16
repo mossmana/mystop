@@ -24,8 +24,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
-        TriMetResponse.Listener, GoogleMap.OnInfoWindowClickListener, DialogInterface.OnDismissListener {
+        TriMetResponse.Listener, GoogleMap.OnInfoWindowClickListener,
+        GoogleMap.OnCameraIdleListener, DialogInterface.OnDismissListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -37,13 +41,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean locationPermissionGranted;
     private Location lastKnownLocation;
     private Marker lastKnownMarker;
+    private List<Marker> markers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         getLocationPermission();
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -61,6 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
         map.setOnInfoWindowClickListener(this);
+        map.setOnCameraIdleListener(this);
         updateLocationUI();
         getDeviceLocation();
     }
@@ -164,9 +169,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onResponse(TriMetResponse response) {
         map.clear();
+        markers.clear();
         NotificationSettings settings = new NotificationSettings(this, null);
         Marker marker;
         for (StopLocation stop : response.getStops()) {
+            if (stop == null || stop.getRoute() == null)
+                continue;
             marker = map.addMarker(new MarkerOptions()
                 .title(stop.getDesc())
                 .snippet(stop.getRoute().getDesc() + ", " + stop.getDir())
@@ -177,6 +185,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 )
                 .position(new LatLng(Double.parseDouble(stop.getLat()),
                         Double.parseDouble(stop.getLng()))));
+            markers.add(marker);
         }
     }
 
@@ -205,6 +214,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             lastKnownMarker.setIcon(BitmapDescriptorFactory.defaultMarker(
                     settings.isNotificationSet(lastKnownMarker.getTitle()) ?
                             BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_ROSE));
+            lastKnownMarker = null;
         }
+    }
+
+    @Override
+    public void onCameraIdle() {
+        if (!isInfoWindowShowing())
+            sendRequest();
+    }
+
+    // FIXME: This seems like a bit of a hack to determine if there is an info window showing
+    private boolean isInfoWindowShowing() {
+        for (Marker marker : markers) {
+            if (marker.isInfoWindowShown()) return true;
+        }
+        return false;
     }
 }
