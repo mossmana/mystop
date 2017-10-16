@@ -3,4 +3,6 @@
     <string name="title_activity_maps">Map</string>
     <string name="missing_permissions">Location permissions required</string>
     <string name="network_not_configured">Network connectivity required</string>
+    <string name="add_notification">Add notification for this stop?</string>
+    <string name="remove_notification">Remove notification for this stop?</string>
 </resources>

@@ -18,10 +18,13 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 
-class MapsActivity : FragmentActivity(), OnMapReadyCallback, TriMetResponse.Listener {
+// TODO: Get the fused location provider to work with Kotlin and replace Java MapsActivity
+class MapsActivityKotlin : FragmentActivity(), OnMapReadyCallback, TriMetResponse.Listener, GoogleMap.OnInfoWindowClickListener {
     // downtown Portland, OR
     private val defaultLocation = LatLng(45.512794, -122.679565)
     private var map: GoogleMap? = null
@@ -107,12 +110,13 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback, TriMetResponse.List
          */
         if (!isNetworkConnected()) {
             Toast.makeText(this, getString(R.string.network_not_configured), Toast.LENGTH_LONG).show();
+            return;
         }
         try {
             if (locationPermissionGranted) {
                 val locationResult = fusedLocationProviderClient!!.lastLocation
-                locationResult.addOnCompleteListener(OnCompleteListener {
-                    fun onComplete(task: Task<*>) {
+                // FIXME: This doesn't seem to be working
+                locationResult.addOnCompleteListener(this, { task ->
                         if (task.isSuccessful) {
                             // Set the map's camera position to the current location of the device.
                             lastKnownLocation = task.result as Location
@@ -127,7 +131,7 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback, TriMetResponse.List
                         }
                         sendRequest()
                     }
-                })
+                )
             }
         } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message)
@@ -142,7 +146,13 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback, TriMetResponse.List
     }
 
     override fun onResponse(response: TriMetResponse) {
-        Toast.makeText(this, response.response.toString(), Toast.LENGTH_LONG).show()
+        response!!.stops!!.forEach {stop ->
+            map!!.addMarker(MarkerOptions()
+                    .title(stop.desc)
+                    .snippet(stop.route!!.desc + ", " + stop.dir)
+                    .visible(true)
+                    .position(LatLng(stop.lat!!.toDouble(), stop.lng!!.toDouble())))
+        }
     }
 
     override fun onError(error: String?) {
@@ -155,9 +165,13 @@ class MapsActivity : FragmentActivity(), OnMapReadyCallback, TriMetResponse.List
         return networkInfo != null && networkInfo.isConnected // 3
     }
 
+    override fun onInfoWindowClick(marker: Marker?) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     companion object {
 
-        private val TAG = MapsActivity::class.java!!.getSimpleName()
+        private val TAG = MapsActivity::class.java!!.simpleName
         private val PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
         private val DEFAULT_ZOOM = 15
     }
