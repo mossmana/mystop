@@ -5,4 +5,6 @@
     <string name="network_not_configured">Network connectivity required</string>
     <string name="add_notification">Add notification for this stop?</string>
     <string name="remove_notification">Remove notification for this stop?</string>
+    <string name="notifications">Notifications</string>
+    <string name="edit_stops">Edit Stops</string>
 </resources>

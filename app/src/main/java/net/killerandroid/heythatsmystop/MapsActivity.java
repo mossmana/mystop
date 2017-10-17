@@ -9,7 +9,10 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -42,11 +45,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location lastKnownLocation;
     private Marker lastKnownMarker;
     private List<Marker> markers = new ArrayList<>();
+    private Toolbar toolbar;
+    private NotificationSettings settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.app_name);
+        setActionBar(toolbar);
+        settings = new NotificationSettings(this, null);
         getLocationPermission();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -54,13 +63,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     87     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
@@ -113,11 +115,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void getLocationPermission() {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationPermissionGranted = true;
@@ -129,10 +126,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void getDeviceLocation() {
-        /*
-         * Get the best and most recent location of the device, which may be null in rare
-         * cases when a location is not available.
-         */
         try {
             if (locationPermissionGranted) {
                 Task locationResult = fusedLocationProviderClient.getLastLocation();
@@ -170,7 +163,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onResponse(TriMetResponse response) {
         map.clear();
         markers.clear();
-        NotificationSettings settings = new NotificationSettings(this, null);
         Marker marker;
         for (StopLocation stop : response.getStops()) {
             if (stop == null || stop.getRoute() == null)
@@ -230,5 +222,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (marker.isInfoWindowShown()) return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        toolbar.inflateMenu(R.menu.main_menu);
+        toolbar.setOnMenuItemClickListener(
+            new Toolbar.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    return onOptionsItemSelected(item);
+                }
+            });
+        return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem notificationsItem = menu.findItem(R.id.notifications);
+        notificationsItem.setChecked(settings.areNotificationsEnabled());
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.notifications:
+                boolean enabled = !item.isChecked();
+                settings.enableNotifications(enabled);
+                item.setChecked(enabled);
+                if (enabled) {
+                    // TODO: start notifications service
+                } else {
+                    // TODO: stop notifications service
+                }
+                break;
+            case R.id.edit_stops:
+                // TODO: launch edit stops activity
+                break;
+        }
+        return true;
     }
 }

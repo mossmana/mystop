@@ -32,8 +32,19 @@ class NotificationSettings(context: Context, name: String? = NAME) {
         return prefs!!.contains(name!!)
     }
 
+    fun enableNotifications(enable: Boolean) {
+        val edit = prefs!!.edit()
+        edit.putBoolean(NOTIFICATIONS, enable)
+        edit.apply()
+    }
+
+    fun areNotificationsEnabled() : Boolean {
+        return prefs!!.getBoolean(NOTIFICATIONS, false)
+    }
+
     companion object {
 
         private val NAME = "net.killerandroid.heythatsmystop.prefs"
+        private val NOTIFICATIONS = "net.killerandroid.heythatsmystop.prefs.notifications"
     }
 }
