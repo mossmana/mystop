@@ -1,4 +1,4 @@
-package net.killerandroid.heythatsmystop
+package net.killerandroid.heythatsmystop.trimet
 
 import android.util.Log
 import android.util.Xml

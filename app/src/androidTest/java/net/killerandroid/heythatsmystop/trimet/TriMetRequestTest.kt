@@ -1,8 +1,9 @@
-package net.killerandroid.heythatsmystop
+package net.killerandroid.heythatsmystop.trimet
 
 import android.support.test.runner.AndroidJUnit4
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import net.killerandroid.heythatsmystop.trimet.TriMetRequest
 import org.hamcrest.core.Is.`is`
 import org.junit.Assert.assertThat
 import org.junit.Test

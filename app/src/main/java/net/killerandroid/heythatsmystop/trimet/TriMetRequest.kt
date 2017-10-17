@@ -1,46 +1,42 @@
-package net.killerandroid.heythatsmystop
+package net.killerandroid.heythatsmystop.trimet
 
 
-import android.content.Context
-import android.net.Uri
-import android.support.annotation.VisibleForTesting
 import com.android.volley.Request
 import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
-import com.google.android.gms.maps.model.LatLngBounds
 
 /**
  * https://developer.trimet.org/ws_docs/stop_location_ws.shtml
  */
-internal class TriMetRequest(bbox: TriMetRequest.Bbox) {
+internal class TriMetRequest(bbox: net.killerandroid.heythatsmystop.trimet.TriMetRequest.Bbox) {
 
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    @android.support.annotation.VisibleForTesting(otherwise = android.support.annotation.VisibleForTesting.PRIVATE)
     var url: String? = null
 
     init {
         buildUrl(bbox)
     }
 
-    private fun buildUrl(bbox: Bbox) {
-        val uri = Uri.Builder()
+    private fun buildUrl(bbox: net.killerandroid.heythatsmystop.trimet.TriMetRequest.Bbox) {
+        val uri = android.net.Uri.Builder()
                 .scheme("https")
-                .authority(BASE_AUTHORITY)
+                .authority(net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.BASE_AUTHORITY)
                 .appendPath("ws")
                 .appendPath("V1")
                 .appendPath("stops")
-                .appendQueryParameter(APP_ID_PARAM, APP_ID)
-                .appendQueryParameter(BBOX_PARAM, bbox.toString())
-                .appendQueryParameter(SHOW_ROUTES_PARAM, "true")
+                .appendQueryParameter(net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.APP_ID_PARAM, net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.APP_ID)
+                .appendQueryParameter(net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.BBOX_PARAM, bbox.toString())
+                .appendQueryParameter(net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.SHOW_ROUTES_PARAM, "true")
                 .build()
         url = uri.toString()
     }
 
-    fun send(context: Context, listener: TriMetResponse.Listener) {
-        val queue = Volley.newRequestQueue(context)
-        val stringRequest = StringRequest(Request.Method.GET, url,
+    fun send(context: android.content.Context, listener: net.killerandroid.heythatsmystop.trimet.TriMetResponse.Listener) {
+        val queue = com.android.volley.toolbox.Volley.newRequestQueue(context)
+        val stringRequest = com.android.volley.toolbox.StringRequest(Request.Method.GET, url,
                 Response.Listener<String> {
-                    response -> listener.onResponse(TriMetResponse(response)) },
+                    response ->
+                    listener.onResponse(net.killerandroid.heythatsmystop.trimet.TriMetResponse(response))
+                },
                 Response.ErrorListener { error -> listener.onError(error.message) })
         queue.add(stringRequest)
     }
@@ -53,7 +49,7 @@ internal class TriMetRequest(bbox: TriMetRequest.Bbox) {
      * bbox arguments are lonmin, latmin, lonmax, latmax in decimal degrees.
      * These define the lower left and upper right corners of the bounding box.
      */
-    (bounds: LatLngBounds) {
+    (bounds: com.google.android.gms.maps.model.LatLngBounds) {
         private val latmin: Double
         private val lonmin: Double
         private val latmax: Double

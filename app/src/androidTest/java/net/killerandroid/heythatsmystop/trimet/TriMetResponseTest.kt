@@ -1,18 +1,14 @@
-package net.killerandroid.heythatsmystop
+package net.killerandroid.heythatsmystop.trimet
 
-import android.support.test.runner.AndroidJUnit4
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThat
 
-import org.junit.Test
-import org.junit.runner.RunWith
-
-@RunWith(AndroidJUnit4::class)
+@org.junit.runner.RunWith(android.support.test.runner.AndroidJUnit4::class)
 class TriMetResponseTest {
 
-    @Test
+    @org.junit.Test
     fun testParse() {
-        val response = TriMetResponse(TEST_XML)
+        val response = net.killerandroid.heythatsmystop.trimet.TriMetResponse(TEST_XML)
         assertThat(response.stops!!.size, `is`(6))
         assertThat(response.stops!!.get(2).desc, `is`("8200 Block SW Barnes (Art School)"))
         assertThat(response.stops!!.get(4).route!!.route, `is`("20"))

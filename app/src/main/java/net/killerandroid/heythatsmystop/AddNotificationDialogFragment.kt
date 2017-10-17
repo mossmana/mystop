@@ -6,6 +6,7 @@ import android.app.DialogFragment
 import android.content.DialogInterface
 import android.os.Bundle
 import com.google.android.gms.maps.model.LatLng
+import net.killerandroid.heythatsmystop.notification.NotificationSettings
 
 class AddNotificationDialogFragment : DialogFragment() {
 

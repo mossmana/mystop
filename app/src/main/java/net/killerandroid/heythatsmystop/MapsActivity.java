@@ -27,6 +27,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import net.killerandroid.heythatsmystop.notification.NotificationSettings;
+import net.killerandroid.heythatsmystop.trimet.StopLocation;
+import net.killerandroid.heythatsmystop.trimet.TriMetRequest;
+import net.killerandroid.heythatsmystop.trimet.TriMetResponse;
+
 import java.util.ArrayList;
 import java.util.List;
 
