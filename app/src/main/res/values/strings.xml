@@ -7,4 +7,6 @@
     <string name="remove_notification">Remove notification for this stop?</string>
     <string name="notifications">Notifications</string>
     <string name="edit_stops">Edit Stops</string>
+    <string name="stop_enabled">Enabled</string>
+    <string name="stop_disabled">Disabled</string>
 </resources>

@@ -35,4 +35,26 @@ class NotificationSettingsTest {
         settings?.enableNotifications(true)
         assertThat(settings?.areNotificationsEnabled(), `is`(true))
     }
+
+    @Test
+    fun testIsNotificationEnabled() {
+        assertThat(settings?.isNotificationEnabled("test location"), `is`(true))
+        settings?.enableNotification("test location", false)
+        assertThat(settings?.isNotificationEnabled("test location"), `is`(false))
+    }
+
+    @Test
+    fun testGetStops() {
+        settings?.enableNotification("test location 1", true)
+        settings?.enableNotification("test location 2", false)
+        settings?.enableNotification("test location 3", true)
+        val stops = settings?.getStops()
+        assertThat(stops?.size, `is`(3))
+        var stop = stops?.toArray()!![0] as StopNotification
+        assertThat(stop.name, `is`("test location 1"))
+        stop = stops?.toArray()!![1] as StopNotification
+        assertThat(stop.name, `is`("test location 2"))
+        stop = stops?.toArray()!![2] as StopNotification
+        assertThat(stop.name, `is`("test location 3"))
+    }
 }

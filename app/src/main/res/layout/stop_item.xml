@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/stop_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/on_off_switch"
+        android:layout_alignBottom="@+id/on_off_switch"
+        tools:text="SW 5th &amp; Market"/>
+
+    <Switch
+        android:id="@+id/on_off_switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:textOn="@string/stop_enabled"
+        android:textOff="@string/stop_disabled"/>
+
+</RelativeLayout>
