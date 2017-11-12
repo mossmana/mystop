@@ -1,11 +1,16 @@
 package net.killerandroid.heythatsmystop;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -16,6 +21,9 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,7 +52,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int DEFAULT_ZOOM = 17;
     // downtown Portland, OR
-    private final LatLng defaultLocation = new LatLng(45.512794, -122.679565);
+    public static final LatLng defaultLocation = new LatLng(45.512794, -122.679565);
     private GoogleMap map;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private boolean locationPermissionGranted;
@@ -53,6 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private List<Marker> markers = new ArrayList<>();
     private Toolbar toolbar;
     private NotificationSettings settings;
+    private LocationCallback locationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +76,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (map == null)
+                    return;
+                lastKnownLocation = locationResult.getLastLocation();
+                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(lastKnownLocation.getLatitude(),
+                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                notifyNearStop();
+                sendRequest();
+            }
+        };
+    }
+
+    private LocationRequest createLocationRequest() {
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(3000);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        return locationRequest;
     }
 
     @Override
@@ -96,9 +126,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void updateLocationUI()
     {
-        if (map == null) {
+        if (map == null)
             return;
-        }
+
         try {
             if (locationPermissionGranted) {
                 map.setMyLocationEnabled(true);
@@ -110,6 +140,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         return true;
                     }
                 });
+                fusedLocationProviderClient.requestLocationUpdates(createLocationRequest(),
+                        locationCallback, null );
             } else {
                 map.setMyLocationEnabled(false);
                 map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -150,6 +182,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
                             map.getUiSettings().setMyLocationButtonEnabled(false);
                         }
+                        notifyNearStop();
                         sendRequest();
                     }
                 });
@@ -269,5 +302,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 break;
         }
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            fusedLocationProviderClient.requestLocationUpdates(createLocationRequest(),
+                    locationCallback, null);
+        } catch (SecurityException e) {
+            getLocationPermission();
+        }
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+    }
+
+    private void notifyNearStop() {
+        if (lastKnownLocation == null || !settings.shouldShowNotification(
+                lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
+            return;
+        try {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
+            r.play();
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        v.vibrate(500);
     }
 }

@@ -1,5 +1,8 @@
 package net.killerandroid.heythatsmystop.notification
 
+import android.location.Location
+import com.google.android.gms.maps.model.LatLng
+import net.killerandroid.heythatsmystop.MapsActivity
 import java.util.*
 
 class NotificationSettings(context: android.content.Context, name: String? = NAME) {
@@ -64,6 +67,28 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
         return stops
     }
 
+    fun shouldShowNotification(lat: Double, lng: Double): Boolean {
+        for (key in prefs!!.all.keys) {
+            if (key.startsWith(NOTIFICATION) && !key.startsWith(NOTIFICATIONS_KEY)
+                    && !key.startsWith(NOTIFICATION_ENABLED)) {
+                val notificationVal = prefs!!.getString(key, "").split(",")
+                val notificationLocation: LatLng?
+                if (notificationVal.size == 2) {
+                    notificationLocation =
+                            LatLng(notificationVal[0].toDouble(), notificationVal[1].toDouble())
+                } else {
+                    notificationLocation = MapsActivity.defaultLocation
+                }
+                val result = FloatArray(3)
+                Location.distanceBetween(lat, lng,
+                        notificationLocation!!.latitude, notificationLocation!!.longitude, result)
+                if (result[0] <= DISTANCE_IN_METERS)
+                    return true;
+            }
+        }
+        return false;
+    }
+
     private fun buildNotificationKey(name: String): String {
         return NOTIFICATION_KEY.format(name)
     }
@@ -83,8 +108,10 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
 
         private val NAME = "net.killerandroid.heythatsmystop.prefs"
         private val NOTIFICATIONS_KEY = "net.killerandroid.heythatsmystop.prefs.notifications"
-        private val NOTIFICATION_KEY = "net.killerandroid.heythatsmystop.prefs.notification-%s"
+        private val NOTIFICATION = "net.killerandroid.heythatsmystop.prefs.notification"
+        private val NOTIFICATION_KEY = NOTIFICATION + "-%s"
         private val NOTIFICATION_ENABLED = "net.killerandroid.heythatsmystop.prefs.notification.enabled"
         private val NOTIFICATION_ENABLED_KEY = NOTIFICATION_ENABLED + "-%s"
+        private val DISTANCE_IN_METERS = 50;
     }
 }
