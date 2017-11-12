@@ -7,13 +7,13 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <android.support.v7.widget.Toolbar
+    <android.widget.Toolbar
         android:id="@+id/toolbar2"
         style="@style/ToolbarStyle" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/stops_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         tools:listitem="@layout/stop_item" />
 </LinearLayout>

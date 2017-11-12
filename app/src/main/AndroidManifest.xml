@@ -40,6 +40,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".EditStopsActivity"
+            android:label="@string/title_activity_stops"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MapsActivity" />
     </application>
 
 </manifest>

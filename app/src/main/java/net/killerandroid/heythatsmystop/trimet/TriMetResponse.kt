@@ -34,7 +34,7 @@ class TriMetResponse(var response: String)
             var eventType = parser.eventType
             var done = false
             var stop: StopLocation? = null
-            var route: StopLocation.Route? = null
+            var route: StopLocation.Route?
             while (eventType != XmlPullParser.END_DOCUMENT && !done) {
                 val name: String
                 when (eventType) {
@@ -94,7 +94,7 @@ class TriMetResponse(var response: String)
     }
 
     companion object {
-        private val TAG = TriMetResponse::class.java!!.getSimpleName()
+        private val TAG = TriMetResponse::class.java.getSimpleName()
 
         private val RESULT_SET = "resultSet"
         private val LOCATION = "location"

@@ -2,6 +2,7 @@ package net.killerandroid.heythatsmystop;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -263,7 +264,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 break;
             case R.id.edit_stops:
-                // TODO: launch edit stops activity
+                Intent intent = new Intent(this, EditStopsActivity.class);
+                startActivity(intent);
                 break;
         }
         return true;

@@ -23,7 +23,7 @@ class AddNotificationDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        var message: String? = null
+        var message: String?
         if (settings!!.isNotificationSet(title!!)) {
             message = getString(R.string.remove_notification)
         } else {
@@ -32,10 +32,10 @@ class AddNotificationDialogFragment : DialogFragment() {
         return AlertDialog.Builder(activity)
                 .setMessage(message)
                 .setPositiveButton(getString(android.R.string.yes)) {
-                    dialog, whichButton -> toggleNotification(); dismiss()
+                    _, _ -> toggleNotification(); dismiss()
                 }
                 .setNegativeButton(getString(android.R.string.no)) {
-                    dialog, whichButton -> dismiss()
+                    _, _ -> dismiss()
                 }
                 .create()
     }
@@ -54,7 +54,7 @@ class AddNotificationDialogFragment : DialogFragment() {
     }
 
     companion object {
-        val TAG = AddNotificationDialogFragment::class.java!!.simpleName
+        val TAG = AddNotificationDialogFragment::class.java.simpleName!!
         val TITLE = "notificationId"
         val POSITION = "position"
     }

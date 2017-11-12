@@ -6,14 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Switch
 import android.widget.TextView
+import net.killerandroid.heythatsmystop.notification.NotificationSettings
 import net.killerandroid.heythatsmystop.notification.StopNotification
 import java.util.*
 
-class StopsAdapter(val stops : TreeSet<StopNotification>) : RecyclerView.Adapter<StopsAdapter.ViewHolder>() {
+class StopsAdapter(val stops : TreeSet<StopNotification>, val settings : NotificationSettings) : RecyclerView.Adapter<StopsAdapter.ViewHolder>() {
 
     override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        val stop = stops?.toArray()[position] as StopNotification
-        holder?.bindStop(stop)
+        val stop = stops.toArray()[position] as StopNotification
+        holder?.bindStop(stop, settings)
     }
 
     override fun getItemCount(): Int {
@@ -26,11 +27,14 @@ class StopsAdapter(val stops : TreeSet<StopNotification>) : RecyclerView.Adapter
     }
 
     class ViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView) {
-        fun bindStop(stop : StopNotification) {
+        fun bindStop(stop : StopNotification, settings: NotificationSettings) {
             val stopDesc = itemView.findViewById<TextView>(R.id.stop_desc)
             val onOffSwitch = itemView.findViewById<Switch>(R.id.on_off_switch)
             stopDesc.text = stop.name
-            onOffSwitch.isEnabled = stop.enabled
+            onOffSwitch.isChecked = stop.enabled
+            onOffSwitch.setOnCheckedChangeListener({ _, isChecked ->
+                settings.enableNotification(stop.name, isChecked)
+            })
         }
     }
 }

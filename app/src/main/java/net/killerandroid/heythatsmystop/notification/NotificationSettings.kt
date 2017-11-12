@@ -17,17 +17,19 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
     fun addNotification(name: String, location: com.google.android.gms.maps.model.LatLng) {
         val edit = prefs!!.edit();
         edit.putString(buildNotificationKey(name), location.latitude.toString() + "," + location.longitude.toString())
+        edit.putBoolean(buildNotificationEnabledKey(name), true)
         edit.apply()
     }
 
     fun removeNotification(name: String) {
         val edit = prefs!!.edit()
         edit.remove(buildNotificationKey(name))
+        edit.remove(buildNotificationEnabledKey(name))
         edit.apply()
     }
 
     fun isNotificationSet(name: String): Boolean {
-        return prefs!!.contains(buildNotificationKey(name!!))
+        return prefs!!.contains(buildNotificationKey(name))
     }
 
     fun enableNotification(name: String, enabled : Boolean) {
@@ -55,7 +57,7 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
         for (key in prefs!!.all.keys) {
             if (key.startsWith(NOTIFICATION_ENABLED)) {
                 val name = key.split("-")[1]
-                val enabled = prefs!!.getBoolean(key, false)
+                val enabled = prefs!!.getBoolean(key, true)
                 stops.add(StopNotification(name, enabled))
             }
         }

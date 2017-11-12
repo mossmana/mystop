@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Hey, that\'s my stop!</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_stops">Edit Stops</string>
     <string name="missing_permissions">Location permissions required</string>
     <string name="network_not_configured">Network connectivity required</string>
     <string name="add_notification">Add notification for this stop?</string>
