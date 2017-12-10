@@ -46,7 +46,8 @@ import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         TriMetResponse.Listener, GoogleMap.OnInfoWindowClickListener,
-        GoogleMap.OnCameraIdleListener, DialogInterface.OnDismissListener {
+        GoogleMap.OnCameraIdleListener, DialogInterface.OnDismissListener,
+        GoogleMap.OnCameraMoveStartedListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -104,6 +105,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         map = googleMap;
         map.setOnInfoWindowClickListener(this);
         map.setOnCameraIdleListener(this);
+        map.setOnCameraMoveStartedListener(this);
         updateLocationUI();
         getDeviceLocation();
     }
@@ -166,6 +168,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void getDeviceLocation() {
         try {
             if (locationPermissionGranted) {
+                resumeLocationUpdates();
                 Task locationResult = fusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(this, new OnCompleteListener() {
                     @Override
@@ -307,18 +310,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onResume() {
         super.onResume();
+        resumeLocationUpdates();
+    }
+
+    private void resumeLocationUpdates() {
         try {
             fusedLocationProviderClient.requestLocationUpdates(createLocationRequest(),
                     locationCallback, null);
         } catch (SecurityException e) {
             getLocationPermission();
         }
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        pauseLocationUpdates();
+    }
+
+    private void pauseLocationUpdates() {
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 
@@ -335,5 +345,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(500);
+    }
+
+    @Override
+    public void onCameraMoveStarted(int reason) {
+        if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION)
+            return;
+        pauseLocationUpdates();
     }
 }
