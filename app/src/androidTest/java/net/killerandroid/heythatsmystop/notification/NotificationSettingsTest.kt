@@ -65,6 +65,8 @@ class NotificationSettingsTest {
         assertThat(settings?.shouldShowNotification(19.444321, -101.837489), `is`(false))
         settings?.enableNotifications(false)
         assertThat(settings?.shouldShowNotification(45.508859, -122.764573), `is`(false))
-
+        settings?.enableNotifications(true)
+        settings?.enableNotification("test location", false)
+        assertThat(settings?.shouldShowNotification(45.508859, -122.764573), `is`(false))
     }
 }

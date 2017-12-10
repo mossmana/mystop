@@ -82,13 +82,15 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
                 val result = FloatArray(3)
                 Location.distanceBetween(lat, lng,
                         notificationLocation!!.latitude, notificationLocation!!.longitude, result)
-                if (result[0] <= DISTANCE_IN_METERS)
-                    return true
-            } else if (key.startsWith(NOTIFICATIONS_KEY)) {
-                return areNotificationsEnabled()
+                val name = key.split("-")[1]
+                if (result[0] > DISTANCE_IN_METERS ||
+                        (result[0] <= DISTANCE_IN_METERS && !isNotificationEnabled(name)))
+                    return false
             }
+            if (key.startsWith(NOTIFICATIONS_KEY) && !areNotificationsEnabled())
+                return false
         }
-        return false
+        return true
     }
 
     private fun buildNotificationKey(name: String): String {
