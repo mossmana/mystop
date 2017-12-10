@@ -18,7 +18,7 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
     }
 
     fun addNotification(name: String, location: com.google.android.gms.maps.model.LatLng) {
-        val edit = prefs!!.edit();
+        val edit = prefs!!.edit()
         edit.putString(buildNotificationKey(name), location.latitude.toString() + "," + location.longitude.toString())
         edit.putBoolean(buildNotificationEnabledKey(name), true)
         edit.apply()
@@ -37,7 +37,7 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
 
     fun enableNotification(name: String, enabled : Boolean) {
         val edit = prefs!!.edit()
-        edit.putBoolean(buildNotificationEnabledKey(name), enabled);
+        edit.putBoolean(buildNotificationEnabledKey(name), enabled)
         edit.apply()
     }
 
@@ -52,7 +52,7 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
     }
 
     fun areNotificationsEnabled(): Boolean {
-        return prefs!!.getBoolean(NOTIFICATIONS_KEY, false)
+        return prefs!!.getBoolean(NOTIFICATIONS_KEY, true)
     }
 
     fun getStops() : TreeSet<StopNotification> {
@@ -83,10 +83,12 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
                 Location.distanceBetween(lat, lng,
                         notificationLocation!!.latitude, notificationLocation!!.longitude, result)
                 if (result[0] <= DISTANCE_IN_METERS)
-                    return true;
+                    return true
+            } else if (key.startsWith(NOTIFICATIONS_KEY)) {
+                return areNotificationsEnabled()
             }
         }
-        return false;
+        return false
     }
 
     private fun buildNotificationKey(name: String): String {
@@ -112,6 +114,6 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
         private val NOTIFICATION_KEY = NOTIFICATION + "-%s"
         private val NOTIFICATION_ENABLED = "net.killerandroid.heythatsmystop.prefs.notification.enabled"
         private val NOTIFICATION_ENABLED_KEY = NOTIFICATION_ENABLED + "-%s"
-        private val DISTANCE_IN_METERS = 50;
+        private val DISTANCE_IN_METERS = 50
     }
 }

@@ -4,7 +4,6 @@ import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import com.google.android.gms.maps.model.LatLng
 import org.hamcrest.CoreMatchers.`is`
-import org.junit.After
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -32,9 +31,9 @@ class NotificationSettingsTest {
 
     @Test
     fun testAreNotificationsEnabled() {
-        assertThat(settings?.areNotificationsEnabled(), `is`(false))
-        settings?.enableNotifications(true)
         assertThat(settings?.areNotificationsEnabled(), `is`(true))
+        settings?.enableNotifications(false)
+        assertThat(settings?.areNotificationsEnabled(), `is`(false))
     }
 
     @Test
@@ -53,15 +52,19 @@ class NotificationSettingsTest {
         assertThat(stops?.size, `is`(3))
         var stop = stops?.toArray()!![0] as StopNotification
         assertThat(stop.name, `is`("test location 1"))
-        stop = stops?.toArray()!![1] as StopNotification
+        stop = stops.toArray()!![1] as StopNotification
         assertThat(stop.name, `is`("test location 2"))
-        stop = stops?.toArray()!![2] as StopNotification
+        stop = stops.toArray()!![2] as StopNotification
         assertThat(stop.name, `is`("test location 3"))
     }
 
     @Test
     fun testShouldShowNotification() {
-        settings?.addNotification("test location", LatLng(45.508990, -122.764143));
+        settings?.addNotification("test location", LatLng(45.508990, -122.764143))
         assertThat(settings?.shouldShowNotification(45.508859, -122.764573), `is`(true))
+        assertThat(settings?.shouldShowNotification(19.444321, -101.837489), `is`(false))
+        settings?.enableNotifications(false)
+        assertThat(settings?.shouldShowNotification(45.508859, -122.764573), `is`(false))
+
     }
 }
