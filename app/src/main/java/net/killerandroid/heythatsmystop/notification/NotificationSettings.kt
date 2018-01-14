@@ -59,7 +59,7 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
         val stops = TreeSet<StopNotification>(NotificationComparator())
         for (key in prefs!!.all.keys) {
             if (key.startsWith(NOTIFICATION_ENABLED)) {
-                val name = key.split("-")[1]
+                val name = key.split("--")[1]
                 val enabled = prefs!!.getBoolean(key, true)
                 stops.add(StopNotification(name, enabled))
             }
@@ -82,7 +82,7 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
                 val result = FloatArray(3)
                 Location.distanceBetween(lat, lng,
                         notificationLocation!!.latitude, notificationLocation!!.longitude, result)
-                val name = key.split("-")[1]
+                val name = key.split("--")[1]
                 if (result[0] > DISTANCE_IN_METERS ||
                         (result[0] <= DISTANCE_IN_METERS && !isNotificationEnabled(name)))
                     return false
@@ -113,9 +113,9 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
         private val NAME = "net.killerandroid.heythatsmystop.prefs"
         private val NOTIFICATIONS_KEY = "net.killerandroid.heythatsmystop.prefs.notifications"
         private val NOTIFICATION = "net.killerandroid.heythatsmystop.prefs.notification"
-        private val NOTIFICATION_KEY = NOTIFICATION + "-%s"
+        private val NOTIFICATION_KEY = NOTIFICATION + "--%s"
         private val NOTIFICATION_ENABLED = "net.killerandroid.heythatsmystop.prefs.notification.enabled"
-        private val NOTIFICATION_ENABLED_KEY = NOTIFICATION_ENABLED + "-%s"
+        private val NOTIFICATION_ENABLED_KEY = NOTIFICATION_ENABLED + "--%s"
         private val DISTANCE_IN_METERS = 50
     }
 }

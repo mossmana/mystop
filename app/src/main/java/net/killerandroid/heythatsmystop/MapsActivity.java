@@ -22,7 +22,6 @@ import android.widget.Toolbar;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,6 +39,7 @@ import net.killerandroid.heythatsmystop.notification.NotificationSettings;
 import net.killerandroid.heythatsmystop.trimet.StopLocation;
 import net.killerandroid.heythatsmystop.trimet.TriMetRequest;
 import net.killerandroid.heythatsmystop.trimet.TriMetResponse;
+import net.killerandroid.heythatsmystop.util.StopLocationRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,11 +47,13 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,
         TriMetResponse.Listener, GoogleMap.OnInfoWindowClickListener,
         GoogleMap.OnCameraIdleListener, DialogInterface.OnDismissListener,
+        GoogleMap.OnMarkerClickListener, GoogleMap.OnInfoWindowCloseListener,
         GoogleMap.OnCameraMoveStartedListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int DEFAULT_ZOOM = 17;
+    private static final String REQUEST_LOCATION_UPDATES = "requestLocationUpdates";
     private static final String NAME_DELIMITER = ":";
     // downtown Portland, OR
     public static final LatLng defaultLocation = new LatLng(45.512794, -122.679565);
@@ -64,6 +66,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Toolbar toolbar;
     private NotificationSettings settings;
     private LocationCallback locationCallback;
+    private boolean requestLocationUpdates;
+    private Intent notificationIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,34 +82,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (map == null)
-                    return;
-                lastKnownLocation = locationResult.getLastLocation();
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(lastKnownLocation.getLatitude(),
-                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                notifyNearStop();
-                sendRequest();
-            }
-        };
+        if (savedInstanceState != null)
+            requestLocationUpdates =
+                    savedInstanceState.getBoolean(REQUEST_LOCATION_UPDATES, false);
+        else
+            requestLocationUpdates = true;
     }
 
-    private LocationRequest createLocationRequest() {
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(3000);
-        locationRequest.setFastestInterval(1000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        return locationRequest;
+    private void startNotificationService() {
+        if (!settings.areNotificationsEnabled())
+            return;
+        if (notificationIntent == null)
+            notificationIntent = new Intent(this, NotificationService.class);
+        startService(notificationIntent);
+    }
+
+    private void stopNotificationService() {
+        if (notificationIntent != null)
+            stopService(notificationIntent);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        map.setOnMarkerClickListener(this);
         map.setOnInfoWindowClickListener(this);
         map.setOnCameraIdleListener(this);
+        map.setOnInfoWindowCloseListener(this);
         map.setOnCameraMoveStartedListener(this);
         updateLocationUI();
         getDeviceLocation();
@@ -114,13 +117,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         locationPermissionGranted = false;
-        switch (requestCode)
-        {
+        switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION:
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     locationPermissionGranted = true;
+                    startNotificationService();
                 }
                 break;
         }
@@ -143,8 +146,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         return true;
                     }
                 });
-                fusedLocationProviderClient.requestLocationUpdates(createLocationRequest(),
-                        locationCallback, null );
+                requestLocationUpdates();
             } else {
                 map.setMyLocationEnabled(false);
                 map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -159,6 +161,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationPermissionGranted = true;
+            startNotificationService();
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
@@ -169,24 +172,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void getDeviceLocation() {
         try {
             if (locationPermissionGranted) {
-                resumeLocationUpdates();
                 Task locationResult = fusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(this, new OnCompleteListener() {
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
                             // Set the map's camera position to the current location of the device.
-                            lastKnownLocation = (Location) task.getResult();
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(lastKnownLocation.getLatitude(),
-                                            lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            moveCamera((Location) task.getResult());
                         } else {
                             Log.d(TAG, "Current location is null. Using defaults.");
                             Log.e(TAG, "Exception: %s", task.getException());
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
                             map.getUiSettings().setMyLocationButtonEnabled(false);
                         }
-                        notifyNearStop();
                         sendRequest();
                     }
                 });
@@ -214,15 +212,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     stop.getRoute().getDesc() + NAME_DELIMITER +
                     stop.getDir();
             marker = map.addMarker(new MarkerOptions()
-                .title(stop.getDesc())
-                .snippet(stop.getRoute().getDesc() + ", " + stop.getDir())
-                .visible(true)
-                .icon(BitmapDescriptorFactory.defaultMarker(
-                        settings.isNotificationSet(tag) ?
-                            BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_ROSE)
-                )
-                .position(new LatLng(Double.parseDouble(stop.getLat()),
-                        Double.parseDouble(stop.getLng()))));
+                    .title(stop.getDesc())
+                    .snippet(stop.getRoute().getDesc() + ", " + stop.getDir())
+                    .visible(true)
+                    .icon(BitmapDescriptorFactory.defaultMarker(
+                            settings.isNotificationSet(tag) ?
+                                    BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_ROSE)
+                    )
+                    .position(new LatLng(Double.parseDouble(stop.getLat()),
+                            Double.parseDouble(stop.getLng()))));
             marker.setTag(tag);
             markers.add(marker);
         }
@@ -250,8 +248,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onDismiss(DialogInterface dialog) {
         if (lastKnownMarker != null) {
             NotificationSettings settings = new NotificationSettings(this, null);
+            String name = "";
+            if (lastKnownMarker.getTag() != null)
+                name = lastKnownMarker.getTag().toString();
             lastKnownMarker.setIcon(BitmapDescriptorFactory.defaultMarker(
-                    settings.isNotificationSet(lastKnownMarker.getTag().toString()) ?
+                    settings.isNotificationSet(name) ?
                             BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_ROSE));
             lastKnownMarker = null;
         }
@@ -275,12 +276,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean onCreateOptionsMenu(Menu menu) {
         toolbar.inflateMenu(R.menu.main_menu);
         toolbar.setOnMenuItemClickListener(
-            new Toolbar.OnMenuItemClickListener() {
-                @Override
-                public boolean onMenuItemClick(MenuItem item) {
-                    return onOptionsItemSelected(item);
-                }
-            });
+                new Toolbar.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        return onOptionsItemSelected(item);
+                    }
+                });
         return true;
     }
 
@@ -298,11 +299,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 boolean enabled = !item.isChecked();
                 settings.enableNotifications(enabled);
                 item.setChecked(enabled);
-                if (enabled) {
-                    // TODO: start notifications service
-                } else {
-                    // TODO: stop notifications service
-                }
+                if (enabled)
+                    startNotificationService();
+                else
+                    stopNotificationService();
                 break;
             case R.id.edit_stops:
                 Intent intent = new Intent(this, EditStopsActivity.class);
@@ -312,50 +312,83 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return true;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        resumeLocationUpdates();
-    }
+    private void requestLocationUpdates() {
+        if (!requestLocationUpdates || !settings.areNotificationsEnabled())
+            return;
 
-    private void resumeLocationUpdates() {
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (map == null)
+                    return;
+                moveCamera(locationResult.getLastLocation());
+                sendRequest();
+            }
+        };
+
         try {
-            fusedLocationProviderClient.requestLocationUpdates(createLocationRequest(),
+            fusedLocationProviderClient.requestLocationUpdates(
+                    new StopLocationRequest().getRequest(),
                     locationCallback, null);
         } catch (SecurityException e) {
             getLocationPermission();
         }
     }
 
+    private void moveCamera(@NonNull Location location) {
+        if (lastKnownLocation != null &&
+                location.getLatitude() == lastKnownLocation.getLatitude() &&
+                location.getLongitude() == lastKnownLocation.getLongitude())
+            return;
+        lastKnownLocation = location;
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(lastKnownLocation.getLatitude(),
+                        lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+    }
+
+    private void removeLocationUpdates() {
+        if (fusedLocationProviderClient == null)
+            return;
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        locationCallback = null;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        requestLocationUpdates();
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
-        pauseLocationUpdates();
+        removeLocationUpdates();
     }
 
-    private void pauseLocationUpdates() {
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(REQUEST_LOCATION_UPDATES, requestLocationUpdates);
     }
 
-    private void notifyNearStop() {
-        if (lastKnownLocation == null || !settings.shouldShowNotification(
-                lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()))
-            return;
-        try {
-            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            Ringtone r = RingtoneManager.getRingtone(getApplicationContext(), notification);
-            r.play();
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
-        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        v.vibrate(500);
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        requestLocationUpdates = false;
+        removeLocationUpdates();
+        return false;
+    }
+
+    @Override
+    public void onInfoWindowClose(Marker marker) {
+        requestLocationUpdates = true;
+        requestLocationUpdates();
     }
 
     @Override
     public void onCameraMoveStarted(int reason) {
         if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_DEVELOPER_ANIMATION)
             return;
-        pauseLocationUpdates();
+        requestLocationUpdates = false;
+        removeLocationUpdates();
     }
 }
