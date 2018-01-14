@@ -52,6 +52,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final String TAG = MapsActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int DEFAULT_ZOOM = 17;
+    private static final String NAME_DELIMITER = ":";
     // downtown Portland, OR
     public static final LatLng defaultLocation = new LatLng(45.512794, -122.679565);
     private GoogleMap map;
@@ -209,16 +210,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         for (StopLocation stop : response.getStops()) {
             if (stop == null || stop.getRoute() == null)
                 continue;
+            String tag = stop.getDesc() + NAME_DELIMITER +
+                    stop.getRoute().getDesc() + NAME_DELIMITER +
+                    stop.getDir();
             marker = map.addMarker(new MarkerOptions()
                 .title(stop.getDesc())
                 .snippet(stop.getRoute().getDesc() + ", " + stop.getDir())
                 .visible(true)
                 .icon(BitmapDescriptorFactory.defaultMarker(
-                        settings.isNotificationSet(stop.getDesc()) ?
+                        settings.isNotificationSet(tag) ?
                             BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_ROSE)
                 )
                 .position(new LatLng(Double.parseDouble(stop.getLat()),
                         Double.parseDouble(stop.getLng()))));
+            marker.setTag(tag);
             markers.add(marker);
         }
     }
@@ -233,8 +238,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         lastKnownMarker = marker;
         AddNotificationDialogFragment dialog = new AddNotificationDialogFragment();
         Bundle args = new Bundle();
-        args.putString(AddNotificationDialogFragment.Companion.getTITLE(),
-                marker.getTitle());
+        args.putString(AddNotificationDialogFragment.Companion.getNAME(),
+                marker.getTag().toString());
         args.putParcelable(AddNotificationDialogFragment.Companion.getPOSITION(),
                 marker.getPosition());
         dialog.setArguments(args);
@@ -246,7 +251,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (lastKnownMarker != null) {
             NotificationSettings settings = new NotificationSettings(this, null);
             lastKnownMarker.setIcon(BitmapDescriptorFactory.defaultMarker(
-                    settings.isNotificationSet(lastKnownMarker.getTitle()) ?
+                    settings.isNotificationSet(lastKnownMarker.getTag().toString()) ?
                             BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_ROSE));
             lastKnownMarker = null;
         }

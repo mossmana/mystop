@@ -11,20 +11,20 @@ import net.killerandroid.heythatsmystop.notification.NotificationSettings
 class AddNotificationDialogFragment : DialogFragment() {
 
     var settings: NotificationSettings? = null
-    var title: String? = null
+    var name: String? = null
     var position: LatLng? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         settings = NotificationSettings(context)
         val args = arguments;
-        title = args.getString(TITLE)
+        name = args.getString(NAME)
         position = args.getParcelable(POSITION)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         var message: String?
-        if (settings!!.isNotificationSet(title!!)) {
+        if (settings!!.isNotificationSet(name!!)) {
             message = getString(R.string.remove_notification)
         } else {
             message = getString(R.string.add_notification)
@@ -47,15 +47,15 @@ class AddNotificationDialogFragment : DialogFragment() {
     }
 
     private fun toggleNotification() {
-        if (settings!!.isNotificationSet(title!!))
-            settings!!.removeNotification(title!!)
+        if (settings!!.isNotificationSet(name!!))
+            settings!!.removeNotification(name!!)
         else
-            settings!!.addNotification(title!!, position!!)
+            settings!!.addNotification(name!!, position!!)
     }
 
     companion object {
         val TAG = AddNotificationDialogFragment::class.java.simpleName!!
-        val TITLE = "notificationId"
+        val NAME = "name"
         val POSITION = "position"
     }
 }
