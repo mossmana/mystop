@@ -1,16 +1,11 @@
 package net.killerandroid.heythatsmystop;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -313,7 +308,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void requestLocationUpdates() {
-        if (!requestLocationUpdates || !settings.areNotificationsEnabled())
+        if (!requestLocationUpdates || !settings.areNotificationsEnabled() ||
+                locationCallback != null)
             return;
 
         locationCallback = new LocationCallback() {
@@ -347,7 +343,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void removeLocationUpdates() {
-        if (fusedLocationProviderClient == null)
+        if (fusedLocationProviderClient == null || locationCallback == null)
             return;
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         locationCallback = null;
