@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.widget.LinearLayout
 import android.widget.Toolbar
 import net.killerandroid.heythatsmystop.notification.NotificationSettings
 
@@ -23,7 +24,7 @@ class EditStopsActivity: Activity() {
 
     private fun populateStops() {
         val stopsList = findViewById<RecyclerView>(R.id.stops_list)
-        stopsList.layoutManager = LinearLayoutManager(this)
+        stopsList.layoutManager = LinearLayoutManager(this, LinearLayout.VERTICAL, false)
         val settings = NotificationSettings(this)
         val stops = settings.getStops()
         stopsList.adapter = StopsAdapter(stops, settings)
