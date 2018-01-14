@@ -206,14 +206,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             String tag = stop.getDesc() + NAME_DELIMITER +
                     stop.getRoute().getDesc() + NAME_DELIMITER +
                     stop.getDir();
+            float hue;
+            if (settings.isNotificationSet(tag))
+                hue = settings.isNotificationEnabled(tag) ? BitmapDescriptorFactory.HUE_GREEN :
+                        BitmapDescriptorFactory.HUE_YELLOW;
+            else
+                hue = BitmapDescriptorFactory.HUE_ROSE;
             marker = map.addMarker(new MarkerOptions()
                     .title(stop.getDesc())
                     .snippet(stop.getRoute().getDesc() + ", " + stop.getDir())
                     .visible(true)
-                    .icon(BitmapDescriptorFactory.defaultMarker(
-                            settings.isNotificationSet(tag) ?
-                                    BitmapDescriptorFactory.HUE_GREEN : BitmapDescriptorFactory.HUE_ROSE)
-                    )
+                    .icon(BitmapDescriptorFactory.defaultMarker(hue))
                     .position(new LatLng(Double.parseDouble(stop.getLat()),
                             Double.parseDouble(stop.getLng()))));
             marker.setTag(tag);
