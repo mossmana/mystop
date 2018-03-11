@@ -108,6 +108,11 @@ class NotificationSettings(context: android.content.Context, name: String? = NAM
         }
     }
 
+    fun clear() {
+        val edit = prefs!!.edit();
+        edit.clear().commit();
+    }
+
     companion object {
 
         private val NAME = "net.killerandroid.heythatsmystop.prefs"
