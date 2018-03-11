@@ -45,7 +45,8 @@
             android:label="@string/title_activity_stops"
             android:screenOrientation="portrait"
             android:parentActivityName="net.killerandroid.mystop.MapsActivity" />
-        <service android:enabled="true" android:name="net.killerandroid.mystop.NotificationService" />
+        <service android:enabled="true" android:name="net.killerandroid.mystop.NotificationService"
+            android:stopWithTask="true" />
     </application>
 
 </manifest>
