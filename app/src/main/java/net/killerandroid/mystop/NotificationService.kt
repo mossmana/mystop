@@ -1,4 +1,4 @@
-package net.killerandroid.heythatsmystop
+package net.killerandroid.mystop
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -7,9 +7,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.location.Location
-import android.media.Ringtone
 import android.media.RingtoneManager
-import android.net.Uri
 import android.os.IBinder
 import android.os.Vibrator
 import android.support.annotation.StringRes
@@ -21,8 +19,8 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 
-import net.killerandroid.heythatsmystop.notification.NotificationSettings
-import net.killerandroid.heythatsmystop.util.StopLocationRequest
+import net.killerandroid.mystop.notification.NotificationSettings
+import net.killerandroid.mystop.util.StopLocationRequest
 
 class NotificationService : Service() {
 

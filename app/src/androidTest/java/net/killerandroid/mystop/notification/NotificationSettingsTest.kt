@@ -1,4 +1,4 @@
-package net.killerandroid.heythatsmystop.notification
+package net.killerandroid.mystop.notification
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4

@@ -1,4 +1,4 @@
-package net.killerandroid.heythatsmystop.trimet
+package net.killerandroid.mystop.trimet
 
 
 import com.android.volley.Request
@@ -7,7 +7,7 @@ import com.android.volley.Response
 /**
  * https://developer.trimet.org/ws_docs/stop_location_ws.shtml
  */
-internal class TriMetRequest(bbox: net.killerandroid.heythatsmystop.trimet.TriMetRequest.Bbox) {
+internal class TriMetRequest(bbox: net.killerandroid.mystop.trimet.TriMetRequest.Bbox) {
 
     @android.support.annotation.VisibleForTesting(otherwise = android.support.annotation.VisibleForTesting.PRIVATE)
     var url: String? = null
@@ -16,26 +16,26 @@ internal class TriMetRequest(bbox: net.killerandroid.heythatsmystop.trimet.TriMe
         buildUrl(bbox)
     }
 
-    private fun buildUrl(bbox: net.killerandroid.heythatsmystop.trimet.TriMetRequest.Bbox) {
+    private fun buildUrl(bbox: net.killerandroid.mystop.trimet.TriMetRequest.Bbox) {
         val uri = android.net.Uri.Builder()
                 .scheme("https")
-                .authority(net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.BASE_AUTHORITY)
+                .authority(net.killerandroid.mystop.trimet.TriMetRequest.Companion.BASE_AUTHORITY)
                 .appendPath("ws")
                 .appendPath("V1")
                 .appendPath("stops")
-                .appendQueryParameter(net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.APP_ID_PARAM, net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.APP_ID)
-                .appendQueryParameter(net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.BBOX_PARAM, bbox.toString())
-                .appendQueryParameter(net.killerandroid.heythatsmystop.trimet.TriMetRequest.Companion.SHOW_ROUTES_PARAM, "true")
+                .appendQueryParameter(net.killerandroid.mystop.trimet.TriMetRequest.Companion.APP_ID_PARAM, net.killerandroid.mystop.trimet.TriMetRequest.Companion.APP_ID)
+                .appendQueryParameter(net.killerandroid.mystop.trimet.TriMetRequest.Companion.BBOX_PARAM, bbox.toString())
+                .appendQueryParameter(net.killerandroid.mystop.trimet.TriMetRequest.Companion.SHOW_ROUTES_PARAM, "true")
                 .build()
         url = uri.toString()
     }
 
-    fun send(context: android.content.Context, listener: net.killerandroid.heythatsmystop.trimet.TriMetResponse.Listener) {
+    fun send(context: android.content.Context, listener: net.killerandroid.mystop.trimet.TriMetResponse.Listener) {
         val queue = com.android.volley.toolbox.Volley.newRequestQueue(context)
         val stringRequest = com.android.volley.toolbox.StringRequest(Request.Method.GET, url,
                 Response.Listener<String> {
                     response ->
-                    listener.onResponse(net.killerandroid.heythatsmystop.trimet.TriMetResponse(response))
+                    listener.onResponse(net.killerandroid.mystop.trimet.TriMetResponse(response))
                 },
                 Response.ErrorListener { error -> listener.onError(error.message) })
         queue.add(stringRequest)

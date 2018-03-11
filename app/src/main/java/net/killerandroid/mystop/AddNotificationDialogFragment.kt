@@ -1,4 +1,4 @@
-package net.killerandroid.heythatsmystop
+package net.killerandroid.mystop
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -6,7 +6,7 @@ import android.app.DialogFragment
 import android.content.DialogInterface
 import android.os.Bundle
 import com.google.android.gms.maps.model.LatLng
-import net.killerandroid.heythatsmystop.notification.NotificationSettings
+import net.killerandroid.mystop.notification.NotificationSettings
 
 class AddNotificationDialogFragment : DialogFragment() {
 

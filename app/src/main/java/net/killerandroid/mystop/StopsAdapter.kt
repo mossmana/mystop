@@ -1,4 +1,4 @@
-package net.killerandroid.heythatsmystop
+package net.killerandroid.mystop
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -6,8 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Switch
 import android.widget.TextView
-import net.killerandroid.heythatsmystop.notification.NotificationSettings
-import net.killerandroid.heythatsmystop.notification.StopNotification
+import net.killerandroid.mystop.notification.NotificationSettings
+import net.killerandroid.mystop.notification.StopNotification
 import java.util.*
 
 class StopsAdapter(val stops : TreeSet<StopNotification>, val settings : NotificationSettings) : RecyclerView.Adapter<StopsAdapter.ViewHolder>() {

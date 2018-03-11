@@ -1,4 +1,4 @@
-package net.killerandroid.heythatsmystop;
+package net.killerandroid.mystop;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -30,11 +30,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-import net.killerandroid.heythatsmystop.notification.NotificationSettings;
-import net.killerandroid.heythatsmystop.trimet.StopLocation;
-import net.killerandroid.heythatsmystop.trimet.TriMetRequest;
-import net.killerandroid.heythatsmystop.trimet.TriMetResponse;
-import net.killerandroid.heythatsmystop.util.StopLocationRequest;
+import net.killerandroid.mystop.notification.NotificationSettings;
+import net.killerandroid.mystop.trimet.StopLocation;
+import net.killerandroid.mystop.trimet.TriMetRequest;
+import net.killerandroid.mystop.trimet.TriMetResponse;
+import net.killerandroid.mystop.util.StopLocationRequest;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package net.killerandroid.heythatsmystop.trimet
+package net.killerandroid.mystop.trimet
 
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.Assert.assertThat
@@ -8,7 +8,7 @@ class TriMetResponseTest {
 
     @org.junit.Test
     fun testParse() {
-        val response = net.killerandroid.heythatsmystop.trimet.TriMetResponse(TEST_XML)
+        val response = net.killerandroid.mystop.trimet.TriMetResponse(TEST_XML)
         assertThat(response.stops!!.size, `is`(6))
         assertThat(response.stops!!.get(2).desc, `is`("8200 Block SW Barnes (Art School)"))
         assertThat(response.stops!!.get(4).route!!.route, `is`("20"))

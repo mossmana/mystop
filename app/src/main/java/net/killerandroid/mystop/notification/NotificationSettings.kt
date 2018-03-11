@@ -1,8 +1,8 @@
-package net.killerandroid.heythatsmystop.notification
+package net.killerandroid.mystop.notification
 
 import android.location.Location
 import com.google.android.gms.maps.model.LatLng
-import net.killerandroid.heythatsmystop.MapsActivity
+import net.killerandroid.mystop.MapsActivity
 import java.util.*
 
 class NotificationSettings(context: android.content.Context, name: String? = NAME) {

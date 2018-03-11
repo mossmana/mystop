@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="net.killerandroid.heythatsmystop">
+    package="net.killerandroid.mystop">
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -32,7 +32,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name="net.killerandroid.mystop.MapsActivity"
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -41,11 +41,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".EditStopsActivity"
+        <activity android:name="net.killerandroid.mystop.EditStopsActivity"
             android:label="@string/title_activity_stops"
             android:screenOrientation="portrait"
-            android:parentActivityName=".MapsActivity" />
-        <service android:enabled="true" android:name=".NotificationService" />
+            android:parentActivityName="net.killerandroid.mystop.MapsActivity" />
+        <service android:enabled="true" android:name="net.killerandroid.mystop.NotificationService" />
     </application>
 
 </manifest>

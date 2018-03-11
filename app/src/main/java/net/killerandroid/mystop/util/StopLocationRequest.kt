@@ -1,4 +1,4 @@
-package net.killerandroid.heythatsmystop.util
+package net.killerandroid.mystop.util
 
 import com.google.android.gms.location.LocationRequest
 
