@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -73,15 +74,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setActionBar(toolbar);
         settings = new NotificationSettings(this, null);
         getLocationPermission();
+        if (locationPermissionGranted) {
+            initializeMap();
+            if (savedInstanceState != null)
+                requestLocationUpdates =
+                        savedInstanceState.getBoolean(REQUEST_LOCATION_UPDATES, false);
+            else
+                requestLocationUpdates = true;
+        }
+    }
+
+    private void initializeMap() {
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        if (savedInstanceState != null)
-            requestLocationUpdates =
-                    savedInstanceState.getBoolean(REQUEST_LOCATION_UPDATES, false);
-        else
-            requestLocationUpdates = true;
     }
 
     private void startNotificationService() {
@@ -118,11 +125,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     locationPermissionGranted = true;
+                    initializeMap();
+                    requestLocationUpdates = true;
+                    updateLocationUI();
                     startNotificationService();
                 }
                 break;
         }
-        updateLocationUI();
     }
 
     private void updateLocationUI()
@@ -312,7 +321,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void requestLocationUpdates() {
         if (!requestLocationUpdates || !settings.areNotificationsEnabled() ||
-                locationCallback != null)
+                locationCallback != null || fusedLocationProviderClient == null)
             return;
 
         locationCallback = new LocationCallback() {
@@ -334,10 +343,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void moveCamera(@NonNull Location location) {
-        if (lastKnownLocation != null &&
+    private void moveCamera(@Nullable Location location) {
+        if (location == null || (lastKnownLocation != null &&
                 location.getLatitude() == lastKnownLocation.getLatitude() &&
-                location.getLongitude() == lastKnownLocation.getLongitude())
+                location.getLongitude() == lastKnownLocation.getLongitude()))
             return;
         lastKnownLocation = location;
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(
