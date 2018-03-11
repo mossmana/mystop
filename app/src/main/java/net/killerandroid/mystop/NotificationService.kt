@@ -13,12 +13,10 @@ import android.os.Vibrator
 import android.support.annotation.StringRes
 import android.support.v4.app.NotificationCompat
 import android.util.Log
-
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-
 import net.killerandroid.mystop.notification.NotificationSettings
 import net.killerandroid.mystop.util.StopLocationRequest
 
@@ -76,7 +74,7 @@ class NotificationService : Service() {
         }
 
         val v = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        v.vibrate(500)
+        v.vibrate(250)
     }
 
     private fun showNotification(@StringRes messageId: Int) {
