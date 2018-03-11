@@ -4,6 +4,7 @@ import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
 import com.google.android.gms.maps.model.LatLng
 import org.hamcrest.CoreMatchers.`is`
+import org.junit.After
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -17,6 +18,11 @@ class NotificationSettingsTest {
     @Before
     fun setupSettings() {
         settings = NotificationSettings(InstrumentationRegistry.getContext(), "test")
+    }
+
+    @After
+    fun tearDownSettings() {
+        settings?.clear()
     }
 
     @Test
